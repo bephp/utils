@@ -2,7 +2,7 @@
     "name": "lloydzhou/utils",
     "type": "library",
     "description": "utils functions for web application.",
-    "keywords": ["config", "session", "cookie", "ip", "cache", "path"],
+    "keywords": ["config", "session", "cookie", "ip", "cache", "path", "shared memory"],
     "homepage": "https://github.com/lloydzhou/utils",
     "license": "MIT",
     "require": {
