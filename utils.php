@@ -58,27 +58,28 @@ function path() {
     return $path;
 }
 /**
- * Sets or gets an entry from the loaded cache file
- * is 'source', it expects $value to be a path to an ini file to load. Calls
- * to config('source', 'inifile.ini') will aggregate the contents of the ini
- * file into config().
+ * Sets or gets an entry from the loaded cache in shared memory
  *
  * @param string $key setting to set or get. passing null resets the config
  * @param string $value optional, If present, sets $key to this $value.
+ * @param string $expire optional, If present, sets $expire to this $value.
  *
  * @return mixed|null value
  */
 function cache($key, $val=null, $expire=100) {
     static $_caches = null;
-    $file = config('cache.file', null, 'cache.bin');
-    if (!$_caches && file_exists($file))
-        $_caches = @unserialize(file_get_contents($file), true);
-    if ($val && $expire){
-        $_caches[$key] = array(time()+intval($expire), $val);
-        file_put_contents($file, serialize($_caches));
+    static $_shm = null;
+    if ( null === $_shm ) $_shm = @shmop_open(crc32(config('mcache.solt', null, 'mcache.solt')),
+        'c', 0755, config('cache.size', null, 10485760));
+    if ( null === $_caches && $_shm && ($size = intval(shmop_read($_shm, 0, 10))))
+        $_caches = $size ? @unserialize(@shmop_read($_shm, 10, $size)) : array();
+    if (($time = time()) && $val && $expire){
+        $_caches[$key] = array($time + intval($expire), $val);
+        if($_shm && ($size = @shmop_write($_shm, serialize(array_filter($_caches, function($n)use($time){return $n[0] > $time;})), 10)))
+            @shmop_write($_shm, sprintf('%10d', $size), 0);
         return $val;
     }
-    return (isset($_caches[$key]) && $_caches[$key][0] > time()) ? $_caches[$key][1] : null;
+    return (isset($_caches[$key]) && $_caches[$key][0] > $time) ? $_caches[$key][1] : null;
 }
 /**
  * Wraps around $_SESSION
