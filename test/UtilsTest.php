@@ -28,6 +28,9 @@ class UtilsTest extends \PHPUnit_Framework_TestCase{
         $this->assertNull(cache('testcachekey'));
         cache('testcachekey', 'testcachevalue', 1);
         $this->assertEquals('testcachevalue', cache('testcachekey'));
+        $this->assertNull(shmcache('testcachekey'));
+        shmcache('testcachekey', 'testcachevalue', 1);
+        $this->assertEquals('testcachevalue', shmcache('testcachekey'));
     }
     /**
      * @depends testConfigInit

@@ -25,7 +25,6 @@
             <directory>.</directory>
             <exclude>
                 <directory>./vendor</directory>
-                <directory>./test</directory>
                 <file>./example.php</file>
             </exclude>
         </whitelist>
