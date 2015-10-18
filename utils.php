@@ -124,4 +124,17 @@ function ip() {
         if (isset($_SERVER[$key])) return $_SERVER[$key];
     return '0.0.0.0';
 }
+/**
+ *
+ *
+ *
+ */
+function logger($path=null){
+    $path = $path?:config('logger.file');
+    return function() use ($path) {
+        if (($argn = func_num_args()) && ($args = func_get_args())) {
+            return error_log(($argn > 1 ? call_user_func_array('sprintf', $args) : array_shift($args)). "\r\n", $path ? 3 : 0, $path ?: null);
+        }
+    };
+}
 
