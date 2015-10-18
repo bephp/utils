@@ -66,11 +66,11 @@ function path() {
  *
  * @return mixed|null value
  */
-function cache($key, $val=null, $expire=100) {
+function mcache($key, $val=null, $expire=100) {
     static $_caches = null;
     static $_shm = null;
     if ( null === $_shm ) $_shm = @shmop_open(crc32(config('mcache.solt', null, 'mcache.solt')),
-        'c', 0755, config('cache.size', null, 10485760));
+        'c', 0755, config('mcache.size', null, 10485760));
     if ( null === $_caches && $_shm && ($size = intval(shmop_read($_shm, 0, 10))))
         $_caches = $size ? @unserialize(@shmop_read($_shm, 10, $size)) : array();
     if (($time = time()) && $val && $expire){
@@ -81,18 +81,18 @@ function cache($key, $val=null, $expire=100) {
     }
     return (isset($_caches[$key]) && $_caches[$key][0] > $time) ? $_caches[$key][1] : null;
 }
-function shmcache($key, $val=null, $expire=100) {
+function cache($key, $val=null, $expire=100) {
     static $_shm = null;
     if ( null === $_shm ){
-        $_shm = @shm_attach(crc32(config('mcache.solt', null, 'mcache.solt')),
+        $_shm = @shm_attach(crc32(config('cache.solt', null, 'cache.solt')),
             config('cache.size', null, 10485760), 0755);
         register_shutdown_function(function() use ($_shm){ shm_detach($_shm); });
     }
     if (($time = time()) && ($k = crc32($key)) && $val && $expire){
-        shm_put_var($_shm, $k, array($time + $expire, $val));
+        @shm_put_var($_shm, $k, array($time + $expire, $val));
         return $val;
     }
-    return shm_has_var($_shm, $k) && ($data=shm_get_var($_shm, $k)) && $data[0]>$time ? $data[1] : null;
+    return ($_shm && shm_has_var($_shm, $k) && ($data=shm_get_var($_shm, $k)) && is_array($data) && $data[0]>$time) ? $data[1] : null;
 }
 /**
  * Wraps around $_SESSION
