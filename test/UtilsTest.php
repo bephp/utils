@@ -41,6 +41,10 @@ class UtilsTest extends \PHPUnit_Framework_TestCase{
         $access = logger();
         $access('test log');
         $access('test format log: %d, %s', 10, 'bababa');
-        $this->assertEquals("test log\r\ntest format log: 10, bababa\r\n", file_get_contents(config('logger.file')));
+        $test = $this;
+        register_shutdown_function(function()use ($test){
+            var_dump(file_get_contents(config('logger.file')));
+            $test->assertEquals("test log\r\ntest format log: 10, bababa\r\n", file_get_contents(config('logger.file')));
+        });
     }
 }

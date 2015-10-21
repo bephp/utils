@@ -144,9 +144,13 @@ function ip() {
  */
 function logger($path=null){
     $path = $path?:config('logger.file');
-    return function() use ($path) {
+    $logs = array();
+    register_shutdown_function(function() use ($path, &$logs){
+        return error_log(implode("\r\n", $logs). "\r\n", $path ? 3 : 0, $path ?: null);
+    });
+    return function() use (&$logs){
         if (($argn = func_num_args()) && ($args = func_get_args())) {
-            return error_log(($argn > 1 ? call_user_func_array('sprintf', $args) : array_shift($args)). "\r\n", $path ? 3 : 0, $path ?: null);
+            return $logs[] = ($argn > 1 ? call_user_func_array('sprintf', $args) : array_shift($args));
         }
     };
 }
