@@ -146,12 +146,12 @@ function logger($path=null){
     $path = $path?:config('logger.file');
     $logs = array();
     register_shutdown_function(function() use ($path, &$logs){
-        return error_log(implode("\r\n", $logs). "\r\n", $path ? 3 : 0, $path ?: null);
+        return count($logs) > 0 ? file_put_contents($path, implode(array_map(function($log){
+            return count($log) > 1 ? call_user_func_array('sprintf', $log) : current($log);
+        }, $logs), PHP_EOL). PHP_EOL, FILE_APPEND | LOCK_EX) : false;
     });
     return function() use (&$logs){
-        if (($argn = func_num_args()) && ($args = func_get_args())) {
-            return $logs[] = ($argn > 1 ? call_user_func_array('sprintf', $args) : array_shift($args));
-        }
+        return func_num_args() > 0 ? $logs[] = func_get_args() : false;
     };
 }
 

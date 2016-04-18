@@ -36,15 +36,14 @@ class UtilsTest extends \PHPUnit_Framework_TestCase{
      * @depends testConfigInit
      */
     public function testLogger($config){
+        config('logger.file', __dir__. '/access.log');
         @unlink(config('logger.file'));
-        $this->assertEquals('access.log', config('logger.file'));
-        $access = logger();
+        $access = logger(config('logger.file'));
         $access('test log');
         $access('test format log: %d, %s', 10, 'bababa');
         $test = $this;
-        register_shutdown_function(function()use ($test){
-            var_dump(file_get_contents(config('logger.file')));
-            $test->assertEquals("test log\r\ntest format log: 10, bababa\r\n", file_get_contents(config('logger.file')));
+        regiSter_shutdown_function(function()use ($test){
+            $test->assertEquals("test log". PHP_EOL. "test format log: 10, bababa". PHP_EOL, file_get_contents(config('logger.file')));
         });
     }
 }
