@@ -13,8 +13,8 @@
  */
 function config($key = null, $value = null, $default=null) {
   static $_config = array();
-  // forced reset call
-  if ($key === null) $_config = array();
+  // get all config
+  if ($key === null) return $_config;
   // if key is source, load ini file and return
   if ($key === 'source' && file_exists($value)) return $_config = array_merge($_config, parse_ini_file($value, true));
   // for all other string keys, set or get
